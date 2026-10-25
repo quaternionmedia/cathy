@@ -1,0 +1,6 @@
+# Editors. Contents rather than the directory: git does not re-include a file
+# whose parent directory is excluded, and the two below are checked in.
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
