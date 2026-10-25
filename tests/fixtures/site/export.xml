@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A made-up site, in the shape a Squarespace export writes. Every name,
+     address and URL in it is invented for the tests. -->
+<rss version="2.0"
+  xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:wp="http://wordpress.org/export/1.2/">
+<channel>
+  <title>Example Ensemble</title>
+  <link>https://example.com</link>
+  <wp:wxr_version>1.2</wp:wxr_version>
+  <wp:author>
+    <wp:author_login>owner</wp:author_login>
+    <wp:author_email>owner@example.com</wp:author_email>
+    <wp:author_display_name>Site Owner</wp:author_display_name>
+  </wp:author>
+
+  <item>
+    <title>Brass &amp; Bellows</title>
+    <link>/projects/brass-and-bellows</link>
+    <dc:creator>owner@example.com</dc:creator>
+    <wp:post_name>brass-and-bellows</wp:post_name>
+    <wp:post_type>post</wp:post_type>
+    <wp:status>publish</wp:status>
+    <wp:post_date>2021-10-02 19:00:00</wp:post_date>
+    <content:encoded><![CDATA[<div class="sqs-html-content"><h2>The band</h2><p>Four players and a <em>tuba</em>.</p></div>[caption id="" align="alignnone" width="1500"]<img src="https://images.squarespace-cdn.com/content/v1/aaa/1/stage.jpg?format=1500w" alt="On stage">[/caption]<style>.sqs-block { margin: 0 }</style><iframe src="//www.youtube.com/embed/dQw4w9WgXcQ?wmode=opaque" title="YouTube embed" allowfullscreen></iframe>]]></content:encoded>
+  </item>
+
+  <item>
+    <title>The "Night" Market's Lights</title>
+    <link>/projects/x9k2q7w4m1zp8v3d6b0n5c</link>
+    <wp:post_name>x9k2q7w4m1zp8v3d6b0n5c</wp:post_name>
+    <wp:post_type>post</wp:post_type>
+    <wp:status>publish</wp:status>
+    <wp:post_date>2022-06-18 21:30:00</wp:post_date>
+    <content:encoded><![CDATA[<p>Lanterns, wired to the sound desk.</p><p><img src="https://images.squarespace-cdn.com/content/v1/bbb/2/stage.jpg" alt="The market stage"></p><iframe src="https://player.vimeo.com/video/123456789?h=abc" title="Lights"></iframe><iframe src="//cdn.embedly.com/widgets/media.html?src=https%3A%2F%2Fw.soundcloud.com%2Fplayer&amp;url=https%3A%2F%2Fsoundcloud.com%2Fexample-ensemble%2Fnight-market&amp;type=text%2Fhtml" title=""></iframe>]]></content:encoded>
+  </item>
+
+  <item>
+    <title>Unfinished</title>
+    <link>/projects/unfinished</link>
+    <wp:post_name>unfinished</wp:post_name>
+    <wp:post_type>post</wp:post_type>
+    <wp:status>draft</wp:status>
+    <wp:post_date>2023-01-01 00:00:00</wp:post_date>
+    <content:encoded><![CDATA[<p>Not ready yet.</p>]]></content:encoded>
+  </item>
+
+  <item>
+    <title>Members only</title>
+    <link>/projects/members-only</link>
+    <wp:post_name>members-only</wp:post_name>
+    <wp:post_type>post</wp:post_type>
+    <wp:status>private</wp:status>
+    <wp:post_date>2023-02-02 00:00:00</wp:post_date>
+    <content:encoded><![CDATA[<p>For the band.</p>]]></content:encoded>
+  </item>
+
+  <item>
+    <title>Lorem Ipsum</title>
+    <link>/press/lorem-ipsum</link>
+    <wp:post_name>lorem-ipsum</wp:post_name>
+    <wp:post_type>post</wp:post_type>
+    <wp:status>publish</wp:status>
+    <wp:post_date>2019-05-05 00:00:00</wp:post_date>
+    <content:encoded><![CDATA[<p>Lorem ipsum dolor sit amet.</p>]]></content:encoded>
+  </item>
+
+  <item>
+    <title>About</title>
+    <link>/about</link>
+    <wp:post_name>about</wp:post_name>
+    <wp:post_type>page</wp:post_type>
+    <wp:status>publish</wp:status>
+    <content:encoded><![CDATA[<h1>About us</h1><p>We play <a href="https://example.com/tour">on tour</a>.</p><img src="https://images.squarespace-cdn.com/content/v1/aaa/3/Band%20Photo.png" alt="The band"><img src="https://example.org/elsewhere.png" alt="Hosted elsewhere">]]></content:encoded>
+  </item>
+
+  <item>
+    <title>Home (Copy)</title>
+    <link>/home-copy</link>
+    <wp:post_name>home-copy</wp:post_name>
+    <wp:post_type>page</wp:post_type>
+    <wp:status>publish</wp:status>
+    <content:encoded><![CDATA[<p>A duplicate the site builder left behind.</p>]]></content:encoded>
+  </item>
+
+  <item>
+    <title>stage.jpg</title>
+    <link>/s/stage.jpg</link>
+    <wp:post_name>stage-jpg</wp:post_name>
+    <wp:post_type>attachment</wp:post_type>
+    <wp:status>inherit</wp:status>
+    <wp:attachment_url>https://images.squarespace-cdn.com/content/v1/aaa/1/stage.jpg</wp:attachment_url>
+  </item>
+</channel>
+</rss>

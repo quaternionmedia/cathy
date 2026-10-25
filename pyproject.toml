@@ -1,0 +1,36 @@
+[project]
+name = "cathy"
+version = "0.0.0"
+description = "Read a site's export from the public internet into pages its owner keeps"
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSES/*"]
+requires-python = ">=3.13"
+dependencies = [
+    "markdownify>=1.1",
+]
+
+[project.scripts]
+cathy = "cathy.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pyyaml>=6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["cathy"]
+
+[tool.pytest.ini_options]
+# Both paths are named, and CI names them again: `testpaths` is ignored once
+# pytest is given a path, so a walkthrough wired only here would run nowhere.
+# `governance` is the vendored corpus, whose own suite is not this project's.
+testpaths = ["tests", "walkthrough"]
+norecursedirs = ["governance", ".venv", "docs"]
+addopts = "--doctest-glob=*.md"
+doctest_optionflags = ["ELLIPSIS"]
