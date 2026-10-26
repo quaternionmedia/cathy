@@ -75,9 +75,10 @@ def to_markdown(content: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", body).strip()
 
 
-def _bare(url: str) -> str:
+def _listed(url: str) -> str:
+    # HTTPS is the one scheme `cathy fetch` requests, and a host is the same host in any case.
     parts = urlsplit(url)
-    return urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
+    return urlunsplit(("https", parts.netloc.lower(), parts.path, "", ""))
 
 
 def _file_name(url: str) -> str:
@@ -87,23 +88,25 @@ def _file_name(url: str) -> str:
 
 
 def asset_names(urls: Iterable[str]) -> dict[str, str]:
-    """A local file name for every image URL, the same for the same set of URLs.
+    """A local file name for every image URL, keyed by the URL `cathy fetch` requests for it.
 
-    URLs differing only in their query are one image. Two images whose names
-    match, ignoring case, both take a suffix from a hash of their URL, so
-    neither keeps the plain name and no name depends on which was read first.
+    That URL is HTTPS with the host in lower case and no query, so URLs differing
+    only in their scheme, the case of their host or their query are one image.
+    Two images whose names match, ignoring case, both take a suffix from a hash
+    of their URL, so neither keeps the plain name and no name depends on which
+    was read first.
     """
     groups: dict[str, list[str]] = defaultdict(list)
-    for bare in sorted({_bare(url) for url in urls}):
-        groups[_file_name(bare).lower()].append(bare)
+    for listed in sorted({_listed(url) for url in urls}):
+        groups[_file_name(listed).lower()].append(listed)
     names = {}
     for group in groups.values():
-        for bare in group:
-            name = _file_name(bare)
+        for listed in group:
+            name = _file_name(listed)
             if len(group) > 1:
                 stem, ext = os.path.splitext(name)
-                name = f"{stem}-{hashlib.sha256(bare.encode()).hexdigest()[:8]}{ext}"
-            names[bare] = name
+                name = f"{stem}-{hashlib.sha256(listed.encode()).hexdigest()[:8]}{ext}"
+            names[listed] = name
     return names
 
 
@@ -111,7 +114,7 @@ def _image_pattern(hosts: Iterable[str]) -> re.Pattern[str] | None:
     hosts = [re.escape(host) for host in hosts]
     if not hosts:
         return None
-    return re.compile(rf"https?://(?:{'|'.join(hosts)})/[^\s\"'()<>\[\]]+")
+    return re.compile(rf"https?://(?:{'|'.join(hosts)})/[^\s\"'()<>\[\]]+", re.IGNORECASE)
 
 
 def select(site: Site, item: wxr.Item) -> tuple[str, tuple[str, ...]] | None:
@@ -150,7 +153,7 @@ def convert(site: Site) -> Converted:
         here = posixpath.dirname(page) or "."
         if pattern:
             body = pattern.sub(
-                lambda match: posixpath.relpath(f"{assets}/{names[_bare(match.group(0))]}", here), body
+                lambda match: posixpath.relpath(f"{assets}/{names[_listed(match.group(0))]}", here), body
             )
         target = site.docs / page
         target.parent.mkdir(parents=True, exist_ok=True)

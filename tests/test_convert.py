@@ -9,12 +9,21 @@ from pathlib import Path
 import pytest
 import yaml
 
-from cathy import config, convert, wxr
+from cathy import config, convert, fetch, net, wxr
+
+MARKET_STAGE = "https://images.squarespace-cdn.com/content/v1/bbb/2/stage.jpg"
 
 
 def _converted(site_dir: Path, **changes) -> tuple[config.Site, convert.Converted]:
     site = replace(config.load(site_dir / "cathy.toml"), **changes)
     return site, convert.convert(site)
+
+
+def _rewrite(path: Path, old: str, new: str) -> None:
+    # Bytes in and out, so the file keeps its line endings; a replacement that finds nothing fails here.
+    before = path.read_bytes()
+    assert old.encode() in before
+    path.write_bytes(before.replace(old.encode(), new.encode()))
 
 
 def _front(page: Path) -> dict:
@@ -67,6 +76,29 @@ def test_an_image_on_another_host_stays_a_link_and_is_not_listed(site_dir):
     site, result = _converted(site_dir)
     assert "](https://example.org/elsewhere.png)" in (site.docs / "about.md").read_text(encoding="utf-8")
     assert not any("example.org" in url for url in result.images)
+
+
+def test_an_http_image_on_a_named_host_is_listed_by_the_https_url_fetch_requests(site_dir):
+    _rewrite(site_dir / "export.xml", MARKET_STAGE, MARKET_STAGE.replace("https://", "http://"))
+    site, result = _converted(site_dir)
+    post = (site.docs / "projects" / "night-market.md").read_text(encoding="utf-8")
+    assert f"](../assets/{result.images[MARKET_STAGE]})" in post
+    for url, _ in fetch.read_manifest(site.manifest):
+        net.check(url, hosts=site.image_hosts, schemes=("https",))
+
+
+def test_an_image_whose_host_the_export_writes_in_capitals_is_linked_locally(site_dir):
+    _rewrite(site_dir / "export.xml", MARKET_STAGE, MARKET_STAGE.replace("images.squarespace-cdn.com", "Images.Squarespace-CDN.com"))
+    site, result = _converted(site_dir)
+    post = (site.docs / "projects" / "night-market.md").read_text(encoding="utf-8")
+    assert f"](../assets/{result.images[MARKET_STAGE]})" in post
+
+
+def test_a_host_cathy_toml_names_in_capitals_is_matched_and_may_be_requested(site_dir):
+    _rewrite(site_dir / "cathy.toml", '"images.squarespace-cdn.com"', '"Images.Squarespace-CDN.com"')
+    site, result = _converted(site_dir)
+    assert MARKET_STAGE in result.images
+    net.check(MARKET_STAGE, hosts=site.image_hosts, schemes=("https",))
 
 
 def test_a_query_string_does_not_make_a_second_image():
@@ -141,3 +173,10 @@ def test_config_refuses_a_path_outside_the_site(site_dir):
     path.write_text(path.read_text(encoding="utf-8").replace('export = "export.xml"', 'export = "../export.xml"'), encoding="utf-8")
     with pytest.raises(config.ConfigError, match="relative path inside the site"):
         config.load(path)
+
+
+@pytest.mark.parametrize("hosts", ['"images.squarespace-cdn.com"', "[1]", '[""]'])
+def test_config_refuses_hosts_that_are_not_a_list_of_names(site_dir, hosts):
+    _rewrite(site_dir / "cathy.toml", '["images.squarespace-cdn.com"]', hosts)
+    with pytest.raises(config.ConfigError, match=r"\[images\] hosts"):
+        config.load(site_dir / "cathy.toml")
