@@ -119,11 +119,13 @@ def select(site: Site, item: wxr.Item) -> tuple[str, tuple[str, ...]] | None:
     allowed = PUBLISHED + (DRAFTS if site.include_drafts else ())
     if item.status not in allowed:
         return None
-    if item.kind == "post" and site.posts_prefix and item.link.startswith(site.posts_prefix):
-        slug = site.slugs.get(item.name, item.name)
+    # `cathy.toml` refuses overlapping prefixes, so a post is in one collection at most.
+    collection = next((posts for posts in site.posts if item.link.startswith(posts.link_prefix)), None)
+    if item.kind == "post" and collection is not None:
+        slug = collection.slugs.get(item.name, item.name)
         if not _SAFE_SLUG.fullmatch(slug):
             raise ConvertError(f"post {item.link!r} has slug {slug!r}, which is not a safe file name")
-        return posixpath.join(site.posts_dir, f"{slug}.md"), site.tags.get(slug, ())
+        return posixpath.join(collection.dir, f"{slug}.md"), collection.tags.get(slug, ())
     if item.kind == "page" and item.name in site.pages:
         return site.pages[item.name], ()
     return None
@@ -143,6 +145,7 @@ def convert(site: Site) -> Converted:
 
     pattern = _image_pattern(site.image_hosts)
     found = [url for _, body in planned.values() for url in (pattern.findall(body) if pattern else ())]
+    # One call across every collection and page, so two images never share a name.
     names = asset_names(found)
     assets = site.assets.relative_to(site.docs).as_posix()
 
