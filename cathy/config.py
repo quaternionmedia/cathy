@@ -57,6 +57,10 @@ def load(path: Path) -> Site:
     if not assets.resolve().is_relative_to(docs.resolve()):
         raise ConfigError("[output] assets must be inside [output] docs, so a page can link to it")
 
+    hosts = images.get("hosts", [])
+    if not isinstance(hosts, list) or not all(isinstance(host, str) and host for host in hosts):
+        raise ConfigError("[images] hosts must be a list of host names")
+
     pages = {}
     for name, target in data.get("pages", {}).items():
         target = _relative(target, f"[pages] {name}")
@@ -69,7 +73,8 @@ def load(path: Path) -> Site:
         docs=docs,
         assets=assets,
         manifest=root / _relative(output.get("manifest", "image_urls.tsv"), "[output] manifest"),
-        image_hosts=tuple(images.get("hosts", ())),
+        # Lower case, as `urlsplit` gives the host it is compared with.
+        image_hosts=tuple(host.lower() for host in hosts),
         include_drafts=bool(source.get("include_drafts", False)),
         posts_prefix=posts.get("link_prefix", ""),
         posts_dir=_relative(posts["dir"], "[posts] dir") if "dir" in posts else "",
