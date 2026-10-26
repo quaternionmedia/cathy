@@ -1,0 +1,31 @@
+# A made-up site's configuration, read by the tests and the walkthrough.
+# Every path here is relative to this file.
+
+[source]
+format = "squarespace-wxr"
+export = "export.xml"
+include_drafts = false
+
+[output]
+docs = "docs"
+assets = "docs/assets"
+manifest = "image_urls.tsv"
+
+[images]
+# Images on these hosts are listed for `cathy fetch` and linked locally;
+# an image on any other host stays a link to that host.
+hosts = ["images.squarespace-cdn.com"]
+
+[posts]
+link_prefix = "/projects/"
+dir = "projects"
+
+[posts.slugs]
+x9k2q7w4m1zp8v3d6b0n5c = "night-market"
+
+[posts.tags]
+brass-and-bellows = ["music"]
+night-market = ["music", "tech"]
+
+[pages]
+about = "about.md"

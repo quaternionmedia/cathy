@@ -1,3 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+
+# A site's export and what cathy makes from it stay with the site, not here.
+# The made-up site under tests/fixtures/ is the one export this repository holds.
+*.xml
+!tests/fixtures/**/*.xml
+image_urls.tsv
+*.part
+
 # Editors. Contents rather than the directory: git does not re-include a file
 # whose parent directory is excluded, and the two below are checked in.
 .vscode/*

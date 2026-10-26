@@ -190,3 +190,16 @@ uploads, signs in or holds a credential, and an outbound act enters only
 through a record of its own. This summarizes §2 of
 `governance/qm/adr/DRAFT-adopt-the-corpus-and-scope-cathy-to-reading.md`;
 where the two differ, the record is what the organisation decided.
+
+### Working on cathy
+
+`uv sync`, then `uv run pytest tests walkthrough -q`. That runs the suite and
+every walkthrough page, as `.github/workflows/tests.yml` does in CI, and names
+both paths because `testpaths` is ignored once pytest is given one.
+
+`cathy/net.py` is the only module that opens a network connection, and every
+request it makes is a GET to a host the site's `cathy.toml` names.
+`tests/test_network_boundary.py` refuses a change that breaks either, and its
+docstring lists what it cannot see. This summarizes
+`governance/qm/adr/DRAFT-one-module-opens-every-connection-cathy-makes.md`;
+where the two differ, the record is what the organisation decided.

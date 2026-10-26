@@ -1,0 +1,35 @@
+name: Tests
+
+# Runs the test suite and the walkthrough. The seed's checks on a pull request
+# lint records, licences and pins, and execute no test.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# One run per branch. On a pull request a newer push replaces the run; on main
+# the run is the record that the commit was checked, so it is never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install through the lock
+        run: uv sync --locked
+
+      - name: Run the suite
+        # Both paths named: `testpaths` is ignored once pytest is given a
+        # path, so a walkthrough left to configuration alone would run nowhere.
+        run: uv run pytest tests walkthrough -q
