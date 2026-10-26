@@ -24,7 +24,7 @@
     <wp:post_type>post</wp:post_type>
     <wp:status>publish</wp:status>
     <wp:post_date>2021-10-02 19:00:00</wp:post_date>
-    <content:encoded><![CDATA[<div class="sqs-html-content"><h2>The band</h2><p>Four players and a <em>tuba</em>.</p></div>[caption id="" align="alignnone" width="1500"]<img src="https://images.squarespace-cdn.com/content/v1/aaa/1/stage.jpg?format=1500w" alt="On stage">[/caption]<style>.sqs-block { margin: 0 }</style><iframe src="//www.youtube.com/embed/dQw4w9WgXcQ?wmode=opaque" title="YouTube embed" allowfullscreen></iframe>]]></content:encoded>
+    <content:encoded><![CDATA[<div class="sqs-html-content"><h2>The band</h2><p>Four players and a <em>tuba</em>.</p></div>[caption id="" align="alignnone" width="1500"]<img src="https://images.squarespace-cdn.com/content/v1/aaa/1/stage.jpg?format=1500w" alt="On stage">[/caption]<style>.sqs-block { margin: 0 }</style><iframe src="//www.youtube.com/embed/dQw4w9WgXcQ?wmode=opaque" title="YouTube embed" allowfullscreen></iframe><p><img src="https://images.squarespace-cdn.com/content/v1/aaa/4/poster.jpg" alt="Tour poster"></p>]]></content:encoded>
   </item>
 
   <item>
@@ -55,6 +55,16 @@
     <wp:status>private</wp:status>
     <wp:post_date>2023-02-02 00:00:00</wp:post_date>
     <content:encoded><![CDATA[<p>For the band.</p>]]></content:encoded>
+  </item>
+
+  <item>
+    <title>Spring Concert</title>
+    <link>/calendar/2024/4/12/spring-concert</link>
+    <wp:post_name>spring-concert</wp:post_name>
+    <wp:post_type>post</wp:post_type>
+    <wp:status>publish</wp:status>
+    <wp:post_date>2024-04-12 19:30:00</wp:post_date>
+    <content:encoded><![CDATA[<p>An evening at the park bandstand.</p><p><img src="https://images.squarespace-cdn.com/content/v1/ccc/5/poster.jpg" alt="Concert poster"></p>]]></content:encoded>
   </item>
 
   <item>

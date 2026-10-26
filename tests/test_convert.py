@@ -17,14 +17,71 @@ def _converted(site_dir: Path, **changes) -> tuple[config.Site, convert.Converte
     return site, convert.convert(site)
 
 
+def _with_slugs(site_dir: Path, slugs: dict[str, str]) -> config.Site:
+    site = config.load(site_dir / "cathy.toml")
+    projects, *rest = site.posts
+    return replace(site, posts=(replace(projects, slugs=slugs), *rest))
+
+
+def _with_posts(site_dir: Path, posts: str) -> Path:
+    """The site's `cathy.toml` with every collection replaced by `posts`."""
+    path = site_dir / "cathy.toml"
+    text = path.read_text(encoding="utf-8")
+    path.write_text(text[: text.index("\n[[posts]]\n") + 1] + posts, encoding="utf-8")
+    return path
+
+
 def _front(page: Path) -> dict:
     head = page.read_text(encoding="utf-8").split("---\n")[1]
     return yaml.safe_load(head)
 
 
-def test_keeps_published_posts_under_the_prefix_and_the_listed_pages(site_dir):
+def test_keeps_published_posts_under_each_prefix_and_the_listed_pages(site_dir):
     _, result = _converted(site_dir)
-    assert result.pages == ["about.md", "projects/brass-and-bellows.md", "projects/night-market.md"]
+    assert result.pages == [
+        "about.md",
+        "calendar/spring-concert.md",
+        "projects/brass-and-bellows.md",
+        "projects/night-market.md",
+    ]
+
+
+def test_each_collection_takes_its_own_tags(site_dir):
+    site, _ = _converted(site_dir)
+    assert _front(site.docs / "calendar" / "spring-concert.md")["tags"] == ["concert"]
+    assert _front(site.docs / "projects" / "brass-and-bellows.md")["tags"] == ["music"]
+
+
+def test_a_single_posts_table_is_one_collection(site_dir):
+    path = _with_posts(site_dir, """\
+[posts]
+link_prefix = "/projects/"
+dir = "projects"
+
+[posts.slugs]
+x9k2q7w4m1zp8v3d6b0n5c = "night-market"
+
+[posts.tags]
+night-market = ["music"]
+""")
+    site = config.load(path)
+    assert site.posts == (
+        config.Collection("/projects/", "projects", {"x9k2q7w4m1zp8v3d6b0n5c": "night-market"}, {"night-market": ("music",)}),
+    )
+    assert convert.convert(site).pages == ["about.md", "projects/brass-and-bellows.md", "projects/night-market.md"]
+
+
+def test_images_are_named_across_every_collection_in_one_run(site_dir):
+    """Named one collection at a time, the two images called poster.jpg would share a file name."""
+    site, result = _converted(site_dir)
+    posters = [
+        "https://images.squarespace-cdn.com/content/v1/aaa/4/poster.jpg",
+        "https://images.squarespace-cdn.com/content/v1/ccc/5/poster.jpg",
+    ]
+    assert [convert.asset_names([url])[url] for url in posters] == ["poster.jpg", "poster.jpg"]
+    together = [result.images[url] for url in posters]
+    assert len(set(together)) == 2 and "poster.jpg" not in together
+    assert f"](../assets/{together[1]})" in (site.docs / "calendar" / "spring-concert.md").read_text(encoding="utf-8")
 
 
 def test_drafts_are_kept_only_when_asked_and_private_posts_never(site_dir):
@@ -113,12 +170,12 @@ def test_conversion_opens_no_network_connection(site_dir, monkeypatch):
 
 def test_two_items_bound_for_one_page_stop_the_conversion(site_dir):
     with pytest.raises(convert.ConvertError, match="both be written"):
-        _converted(site_dir, slugs={"x9k2q7w4m1zp8v3d6b0n5c": "Brass-And-Bellows"})
+        convert.convert(_with_slugs(site_dir, {"x9k2q7w4m1zp8v3d6b0n5c": "Brass-And-Bellows"}))
 
 
 def test_a_slug_that_leaves_the_directory_stops_the_conversion(site_dir):
     with pytest.raises(convert.ConvertError, match="not a safe file name"):
-        _converted(site_dir, slugs={"x9k2q7w4m1zp8v3d6b0n5c": "../escaped"})
+        convert.convert(_with_slugs(site_dir, {"x9k2q7w4m1zp8v3d6b0n5c": "../escaped"}))
 
 
 def test_scripts_and_styles_leave_no_text_behind():
@@ -140,4 +197,60 @@ def test_config_refuses_a_path_outside_the_site(site_dir):
     path = site_dir / "cathy.toml"
     path.write_text(path.read_text(encoding="utf-8").replace('export = "export.xml"', 'export = "../export.xml"'), encoding="utf-8")
     with pytest.raises(config.ConfigError, match="relative path inside the site"):
+        config.load(path)
+
+
+@pytest.mark.parametrize(
+    ("first", "second"),
+    [("/projects/", "/projects/"), ("/projects", "/projects/archive/"), ("/calendar/2024/", "/calendar/")],
+)
+def test_config_refuses_collections_whose_prefixes_overlap(site_dir, first, second):
+    path = _with_posts(site_dir, f"""\
+[[posts]]
+link_prefix = "{first}"
+dir = "one"
+
+[[posts]]
+link_prefix = "{second}"
+dir = "two"
+""")
+    with pytest.raises(config.ConfigError, match="overlap"):
+        config.load(path)
+
+
+@pytest.mark.parametrize(
+    ("first", "second"),
+    [('dir = "news"', 'dir = "news"'), ('dir = "news"', 'dir = "News/"'), ("", 'dir = "."')],
+)
+def test_config_refuses_collections_that_share_a_dir(site_dir, first, second):
+    path = _with_posts(site_dir, f"""\
+[[posts]]
+link_prefix = "/blog/"
+{first}
+
+[[posts]]
+link_prefix = "/calendar/"
+{second}
+""")
+    with pytest.raises(config.ConfigError, match="one directory"):
+        config.load(path)
+
+
+@pytest.mark.parametrize(
+    ("posts", "message"),
+    [
+        ('[posts]\ndir = "projects"\n', r"\[posts\] link_prefix must be"),
+        ('[[posts]]\nlink_prefix = "/blog/"\n\n[[posts]]\nlink_prefix = ""\n', r"\[\[posts\]\] 2 link_prefix must be"),
+    ],
+)
+def test_config_refuses_a_collection_with_no_prefix_to_select_by(site_dir, posts, message):
+    with pytest.raises(config.ConfigError, match=message):
+        config.load(_with_posts(site_dir, posts))
+
+
+@pytest.mark.parametrize("value", ["3", '"/projects/"', "[1, 2]"])
+def test_config_refuses_posts_that_are_not_tables(site_dir, value):
+    path = _with_posts(site_dir, "")
+    path.write_text(f"posts = {value}\n" + path.read_text(encoding="utf-8"), encoding="utf-8")
+    with pytest.raises(config.ConfigError, match="must be a table"):
         config.load(path)

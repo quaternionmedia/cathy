@@ -16,7 +16,16 @@ manifest = "image_urls.tsv"
 # an image on any other host stays a link to that host.
 hosts = ["images.squarespace-cdn.com"]
 
-[posts]
+[pages]
+about = "about.md"
+
+# Each [[posts]] is one collection: the posts whose link starts with its
+# link_prefix, written to its dir. A site with one collection may write it as
+# a single [posts] table. Two prefixes may not overlap, and two dirs may not be
+# one directory. A [posts.slugs] or [posts.tags] table belongs to the [[posts]]
+# above it.
+
+[[posts]]
 link_prefix = "/projects/"
 dir = "projects"
 
@@ -27,5 +36,9 @@ x9k2q7w4m1zp8v3d6b0n5c = "night-market"
 brass-and-bellows = ["music"]
 night-market = ["music", "tech"]
 
-[pages]
-about = "about.md"
+[[posts]]
+link_prefix = "/calendar/"
+dir = "calendar"
+
+[posts.tags]
+spring-concert = ["concert"]
